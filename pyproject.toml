@@ -1,0 +1,35 @@
+[build-system]
+requires = ["uv_build>=0.9.9,<0.10.0"]
+build-backend = "uv_build"
+
+[project]
+name = "pytally"
+version = "0.1.0"
+description = "Unofficial Python SDK for the Tally.so API"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Felipe Adeildo", email = "contato@felipeadeildo.com" }]
+license = "Apache-2.0"
+keywords = ["tally", "forms", "api", "sdk", "tally.so", "form-builder"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "httpx>=0.28.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/felipeadeildo/pytally"
+Repository = "https://github.com/felipeadeildo/pytally"
+Issues = "https://github.com/felipeadeildo/pytally/issues"
+
+[tool.uv.build-backend]
+module-name = "tally"
+module-root = "src"
