@@ -3,7 +3,7 @@ requires = ["uv_build>=0.9.9,<0.10.0"]
 build-backend = "uv_build"
 
 [project]
-name = "pytally"
+name = "pytally-sdk"
 version = "0.1.0"
 description = "Unofficial Python SDK for the Tally.so API"
 readme = "README.md"
@@ -33,3 +33,8 @@ Issues = "https://github.com/felipeadeildo/pytally/issues"
 [tool.uv.build-backend]
 module-name = "tally"
 module-root = "src"
+
+[dependency-groups]
+dev = [
+    "ipython>=9.7.0",
+]
