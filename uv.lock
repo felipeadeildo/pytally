@@ -700,7 +700,6 @@ version = "0.1.7"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
-    { name = "mkdocstrings-python" },
 ]
 
 [package.dev-dependencies]
@@ -716,10 +715,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "mkdocstrings-python", specifier = ">=1.19.0" },
-]
+requires-dist = [{ name = "httpx", specifier = ">=0.28.1" }]
 
 [package.metadata.requires-dev]
 dev = [
