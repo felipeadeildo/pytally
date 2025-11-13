@@ -103,6 +103,24 @@ class FormBlock:
     group_type: BlockType | str
     payload: BlockPayload | None = None
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "FormBlock":
+        """Create a FormBlock instance from API response data."""
+        block_type = data["type"]
+        group_type = data["groupType"]
+
+        return cls(
+            uuid=data["uuid"],
+            type=BlockType(block_type)
+            if block_type in BlockType.__members__.values()
+            else block_type,
+            group_uuid=data["groupUuid"],
+            group_type=BlockType(group_type)
+            if group_type in BlockType.__members__.values()
+            else group_type,
+            payload=data.get("payload"),
+        )
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to API request format."""
         block_dict: dict[str, Any] = {
@@ -152,6 +170,46 @@ class FormSettings:
     password: str | None = None
     submissions_data_retention_duration: int | None = None
     submissions_data_retention_unit: str | None = None
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "FormSettings":
+        """Create a FormSettings instance from API response data."""
+        return cls(
+            language=data.get("language"),
+            is_closed=data.get("isClosed", False),
+            close_message_title=data.get("closeMessageTitle"),
+            close_message_description=data.get("closeMessageDescription"),
+            close_timezone=data.get("closeTimezone"),
+            close_date=data.get("closeDate"),
+            close_time=data.get("closeTime"),
+            submissions_limit=data.get("submissionsLimit"),
+            unique_submission_key=data.get("uniqueSubmissionKey"),
+            redirect_on_completion=data.get("redirectOnCompletion"),
+            has_self_email_notifications=data.get("hasSelfEmailNotifications", False),
+            self_email_to=data.get("selfEmailTo"),
+            self_email_reply_to=data.get("selfEmailReplyTo"),
+            self_email_subject=data.get("selfEmailSubject"),
+            self_email_from_name=data.get("selfEmailFromName"),
+            self_email_body=data.get("selfEmailBody"),
+            has_respondent_email_notifications=data.get(
+                "hasRespondentEmailNotifications", False
+            ),
+            respondent_email_to=data.get("respondentEmailTo"),
+            respondent_email_reply_to=data.get("respondentEmailReplyTo"),
+            respondent_email_subject=data.get("respondentEmailSubject"),
+            respondent_email_from_name=data.get("respondentEmailFromName"),
+            respondent_email_body=data.get("respondentEmailBody"),
+            has_progress_bar=data.get("hasProgressBar", False),
+            has_partial_submissions=data.get("hasPartialSubmissions", False),
+            page_auto_jump=data.get("pageAutoJump", False),
+            save_for_later=data.get("saveForLater", True),
+            styles=data.get("styles"),
+            password=data.get("password"),
+            submissions_data_retention_duration=data.get(
+                "submissionsDataRetentionDuration"
+            ),
+            submissions_data_retention_unit=data.get("submissionsDataRetentionUnit"),
+        )
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to API request format."""
@@ -280,6 +338,48 @@ class Form:
             is_closed=data["isClosed"],
             created_at=datetime.fromisoformat(data["createdAt"].replace("Z", "+00:00")),
             updated_at=datetime.fromisoformat(data["updatedAt"].replace("Z", "+00:00")),
+            payments=[
+                FormPayment.from_dict(payment) for payment in data.get("payments", [])
+            ]
+            if data.get("payments")
+            else None,
+        )
+
+
+@dataclass
+class FormDetails:
+    """Represents a complete Tally form with all blocks and settings.
+
+    This is returned by the get() method and includes the full form structure,
+    unlike the simplified Form model used in list operations.
+    """
+
+    id: str
+    name: str
+    workspace_id: str
+    status: FormStatus
+    number_of_submissions: int
+    is_closed: bool
+    created_at: datetime
+    updated_at: datetime
+    settings: FormSettings
+    blocks: list[FormBlock]
+    payments: list[FormPayment] | None = None
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "FormDetails":
+        """Create a FormDetails instance from API response data."""
+        return cls(
+            id=data["id"],
+            name=data["name"],
+            workspace_id=data["workspaceId"],
+            status=FormStatus(data["status"]),
+            number_of_submissions=data["numberOfSubmissions"],
+            is_closed=data["isClosed"],
+            created_at=datetime.fromisoformat(data["createdAt"].replace("Z", "+00:00")),
+            updated_at=datetime.fromisoformat(data["updatedAt"].replace("Z", "+00:00")),
+            settings=FormSettings.from_dict(data["settings"]),
+            blocks=[FormBlock.from_dict(block) for block in data.get("blocks", [])],
             payments=[
                 FormPayment.from_dict(payment) for payment in data.get("payments", [])
             ]

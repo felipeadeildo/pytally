@@ -6,6 +6,7 @@ from tally.models.form import (
     Form,
     FormBlock,
     FormCreated,
+    FormDetails,
     FormSettings,
     FormStatus,
     PaginatedForms,
@@ -75,6 +76,59 @@ class FormsResource:
 
         data = self._client.request("GET", "/forms", params=params)
         return PaginatedForms.from_dict(data)
+
+    def get(self, form_id: str) -> FormDetails:
+        """Get a single form by ID with all its blocks and settings.
+
+        Returns the complete form structure including all blocks, settings,
+        and configuration details.
+
+        Args:
+            form_id: The ID of the form to retrieve
+
+        Returns:
+            FormDetails object containing the complete form with blocks and settings
+
+        Raises:
+            NotFoundError: If the form doesn't exist or you don't have access
+            UnauthorizedError: If authentication credentials are invalid
+
+        Example:
+            ```python
+            from tally import Tally
+
+            client = Tally(api_key="tly-xxxx")
+
+            # Get a form by ID
+            form = client.forms.get("form_abc123")
+
+            print(f"Form: {form.name}")
+            print(f"Status: {form.status.value}")
+            print(f"Workspace: {form.workspace_id}")
+            print(f"Submissions: {form.number_of_submissions}")
+            print(f"Is Closed: {form.is_closed}")
+
+            # Access settings
+            print(f"Language: {form.settings.language}")
+            print(f"Has Progress Bar: {form.settings.has_progress_bar}")
+            print(f"Save for Later: {form.settings.save_for_later}")
+
+            # Access blocks
+            print(f"Total blocks: {len(form.blocks)}")
+            for block in form.blocks:
+                print(f"  Block {block.uuid}: {block.type}")
+                print(f"    Group: {block.group_type}")
+                if block.payload:
+                    print(f"    Payload: {block.payload}")
+
+            # Access payments if configured
+            if form.payments:
+                for payment in form.payments:
+                    print(f"Payment: {payment.amount} {payment.currency}")
+            ```
+        """
+        data = self._client.request("GET", f"/forms/{form_id}")
+        return FormDetails.from_dict(data)
 
     def create(
         self,
