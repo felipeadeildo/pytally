@@ -17,6 +17,14 @@ class FormStatus(str, Enum):
     DELETED = "DELETED"
 
 
+class SubmissionFilter(str, Enum):
+    """Submission filter types."""
+
+    ALL = "all"
+    COMPLETED = "completed"
+    PARTIAL = "partial"
+
+
 class BlockType(str, Enum):
     """Form block types."""
 
@@ -407,4 +415,214 @@ class PaginatedForms:
             limit=data["limit"],
             total=data["total"],
             has_more=data["hasMore"],
+        )
+
+
+@dataclass
+class QuestionField:
+    """Represents a field within a form question."""
+
+    uuid: str
+    type: BlockType | str
+    block_group_uuid: str
+    title: str
+    has_responses: bool
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "QuestionField":
+        """Create a QuestionField instance from API response data."""
+        field_type = data["type"]
+
+        return cls(
+            uuid=data["uuid"],
+            type=BlockType(field_type)
+            if field_type in BlockType.__members__.values()
+            else field_type,
+            block_group_uuid=data["blockGroupUuid"],
+            title=data["title"],
+            has_responses=data["hasResponses"],
+        )
+
+
+@dataclass
+class Question:
+    """Represents a question in a Tally form."""
+
+    id: str
+    type: BlockType | str
+    title: str
+    is_title_modified_by_user: bool
+    form_id: str
+    is_deleted: bool
+    number_of_responses: int
+    created_at: datetime
+    updated_at: datetime
+    fields: list[QuestionField]
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Question":
+        """Create a Question instance from API response data."""
+        question_type = data["type"]
+
+        return cls(
+            id=data["id"],
+            type=BlockType(question_type)
+            if question_type in BlockType.__members__.values()
+            else question_type,
+            title=data["title"],
+            is_title_modified_by_user=data["isTitleModifiedByUser"],
+            form_id=data["formId"],
+            is_deleted=data["isDeleted"],
+            number_of_responses=data["numberOfResponses"],
+            created_at=datetime.fromisoformat(data["createdAt"].replace("Z", "+00:00")),
+            updated_at=datetime.fromisoformat(data["updatedAt"].replace("Z", "+00:00")),
+            fields=[QuestionField.from_dict(field) for field in data.get("fields", [])],
+        )
+
+
+@dataclass
+class SubmissionResponse:
+    """Represents a response to a question in a submission."""
+
+    question_id: str
+    value: str | int | float | bool | list | dict | None
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SubmissionResponse":
+        """Create a SubmissionResponse instance from API response data."""
+        return cls(
+            question_id=data["questionId"],
+            value=data.get("value"),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to API request format."""
+        return {
+            "questionId": self.question_id,
+            "value": self.value,
+        }
+
+
+@dataclass
+class Submission:
+    """Represents a form submission."""
+
+    id: str
+    form_id: str
+    is_completed: bool
+    submitted_at: datetime
+    responses: list[SubmissionResponse]
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Submission":
+        """Create a Submission instance from API response data."""
+        return cls(
+            id=data["id"],
+            form_id=data["formId"],
+            is_completed=data["isCompleted"],
+            submitted_at=datetime.fromisoformat(
+                data["submittedAt"].replace("Z", "+00:00")
+            ),
+            responses=[
+                SubmissionResponse.from_dict(response)
+                for response in data.get("responses", [])
+            ],
+        )
+
+
+@dataclass
+class SubmissionsFilterCount:
+    """Represents submission counts per filter type."""
+
+    all: int
+    completed: int
+    partial: int
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SubmissionsFilterCount":
+        """Create a SubmissionsFilterCount instance from API response data."""
+        return cls(
+            all=data["all"], completed=data["completed"], partial=data["partial"]
+        )
+
+
+@dataclass
+class PaginatedSubmissions:
+    """Represents a paginated response of form submissions."""
+
+    page: int
+    limit: int
+    has_more: bool
+    total_number_of_submissions_per_filter: SubmissionsFilterCount
+    questions: list[Question]
+    submissions: list[Submission]
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "PaginatedSubmissions":
+        """Create a PaginatedSubmissions instance from API response data."""
+        return cls(
+            page=data["page"],
+            limit=data["limit"],
+            has_more=data["hasMore"],
+            total_number_of_submissions_per_filter=SubmissionsFilterCount.from_dict(
+                data["totalNumberOfSubmissionsPerFilter"]
+            ),
+            questions=[Question.from_dict(q) for q in data.get("questions", [])],
+            submissions=[Submission.from_dict(s) for s in data.get("submissions", [])],
+        )
+
+
+@dataclass
+class SubmissionDetails:
+    """Represents a complete form submission with all metadata.
+
+    This is returned by the get_submission() method and includes additional
+    timestamps (created_at, updated_at), unlike the simplified Submission
+    model used in list operations.
+    """
+
+    id: str
+    form_id: str
+    is_completed: bool
+    submitted_at: datetime
+    created_at: datetime
+    updated_at: datetime
+    responses: list[SubmissionResponse]
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SubmissionDetails":
+        """Create a SubmissionDetails instance from API response data."""
+        return cls(
+            id=data["id"],
+            form_id=data["formId"],
+            is_completed=data["isCompleted"],
+            submitted_at=datetime.fromisoformat(
+                data["submittedAt"].replace("Z", "+00:00")
+            ),
+            created_at=datetime.fromisoformat(data["createdAt"].replace("Z", "+00:00")),
+            updated_at=datetime.fromisoformat(data["updatedAt"].replace("Z", "+00:00")),
+            responses=[
+                SubmissionResponse.from_dict(response)
+                for response in data.get("responses", [])
+            ],
+        )
+
+
+@dataclass
+class SubmissionWithQuestions:
+    """Represents a submission response with its associated questions.
+
+    This is the response structure from the get_submission() endpoint,
+    which includes both the submission details and all form questions.
+    """
+
+    questions: list[Question]
+    submission: SubmissionDetails
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SubmissionWithQuestions":
+        """Create a SubmissionWithQuestions instance from API response data."""
+        return cls(
+            questions=[Question.from_dict(q) for q in data.get("questions", [])],
+            submission=SubmissionDetails.from_dict(data["submission"]),
         )

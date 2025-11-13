@@ -10,6 +10,10 @@ from tally.models.form import (
     FormSettings,
     FormStatus,
     PaginatedForms,
+    PaginatedSubmissions,
+    Question,
+    SubmissionFilter,
+    SubmissionWithQuestions,
 )
 
 if TYPE_CHECKING:
@@ -334,6 +338,223 @@ class FormsResource:
             ```
         """
         self._client.request("DELETE", f"/forms/{form_id}")
+
+    def list_questions(self, form_id: str) -> list[Question]:
+        """Get all questions in a form.
+
+        Returns a list of all questions in a form, including their fields,
+        response counts, and metadata.
+
+        Args:
+            form_id: The ID of the form
+
+        Returns:
+            List of Question objects
+
+        Example:
+            ```python
+            from tally import Tally
+
+            client = Tally(api_key="tly-xxxx")
+
+            # Get all questions in a form
+            questions = client.forms.list_questions("form_abc123")
+
+            for question in questions:
+                print(f"Question: {question.title}")
+                print(f"  Type: {question.type}")
+                print(f"  ID: {question.id}")
+                print(f"  Responses: {question.number_of_responses}")
+
+                # Access question fields
+                print(f"  Fields ({len(question.fields)}):")
+                for field in question.fields:
+                    print(f"    - {field.title} ({field.type})")
+                    print(f"      UUID: {field.uuid}")
+                    print(f"      Has responses: {field.has_responses}")
+            ```
+        """
+        data = self._client.request("GET", f"/forms/{form_id}/questions")
+        return [Question.from_dict(q) for q in data.get("questions", [])]
+
+    def list_submissions(
+        self,
+        form_id: str,
+        page: int = 1,
+        filter: SubmissionFilter | str | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        after_id: str | None = None,
+    ) -> PaginatedSubmissions:
+        """Get form submissions with pagination and filtering.
+
+        Returns a paginated list of submissions for a specific form, including
+        all questions and responses. Supports filtering by completion status,
+        date range, and cursor-based pagination.
+
+        Args:
+            form_id: The ID of the form
+            page: Page number for pagination (default: 1)
+            filter: Filter by completion status ("all", "completed", "partial")
+            start_date: Filter submissions on or after this date (ISO 8601 format)
+            end_date: Filter submissions on or before this date (ISO 8601 format)
+            after_id: Get submissions that came after a specific submission ID
+
+        Returns:
+            PaginatedSubmissions object containing submissions, questions, and pagination info
+
+        Example:
+            ```python
+            from tally import Tally
+            from tally.models import SubmissionFilter
+
+            client = Tally(api_key="tly-xxxx")
+
+            # Get first page of all submissions
+            result = client.forms.list_submissions("form_abc123")
+
+            print(f"Page {result.page}, Has more: {result.has_more}")
+            print(f"Total: {result.total_number_of_submissions_per_filter.all}")
+            print(f"Completed: {result.total_number_of_submissions_per_filter.completed}")
+            print(f"Partial: {result.total_number_of_submissions_per_filter.partial}")
+
+            # Access questions
+            for question in result.questions:
+                print(f"Question: {question.title} ({question.type})")
+
+            # Access submissions
+            for submission in result.submissions:
+                print(f"Submission {submission.id}:")
+                print(f"  Completed: {submission.is_completed}")
+                print(f"  Submitted at: {submission.submitted_at}")
+
+                # Access responses
+                for response in submission.responses:
+                    print(f"    Question {response.question_id}: {response.value}")
+
+            # Filter by completion status
+            completed = client.forms.list_submissions(
+                "form_abc123",
+                filter=SubmissionFilter.COMPLETED
+            )
+
+            # Filter by date range
+            recent = client.forms.list_submissions(
+                "form_abc123",
+                start_date="2024-01-01T00:00:00Z",
+                end_date="2024-12-31T23:59:59Z"
+            )
+
+            # Cursor-based pagination
+            next_batch = client.forms.list_submissions(
+                "form_abc123",
+                after_id=result.submissions[-1].id
+            )
+            ```
+        """
+        params: dict[str, str | int] = {"page": page}
+
+        if filter is not None:
+            params["filter"] = (
+                filter.value if isinstance(filter, SubmissionFilter) else filter
+            )
+
+        if start_date is not None:
+            params["startDate"] = start_date
+
+        if end_date is not None:
+            params["endDate"] = end_date
+
+        if after_id is not None:
+            params["afterId"] = after_id
+
+        data = self._client.request(
+            "GET", f"/forms/{form_id}/submissions", params=params
+        )
+        return PaginatedSubmissions.from_dict(data)
+
+    def get_submission(
+        self, form_id: str, submission_id: str
+    ) -> SubmissionWithQuestions:
+        """Get a specific submission by ID with all its responses and questions.
+
+        Returns the complete submission details including all responses and
+        the associated form questions.
+
+        Args:
+            form_id: The ID of the form
+            submission_id: The ID of the submission to retrieve
+
+        Returns:
+            SubmissionWithQuestions object containing the submission and all form questions
+
+        Raises:
+            NotFoundError: If the form or submission doesn't exist or you don't have access
+            UnauthorizedError: If authentication credentials are invalid
+
+        Example:
+            ```python
+            from tally import Tally
+
+            client = Tally(api_key="tly-xxxx")
+
+            result = client.forms.get_submission(
+                form_id="form_abc123",
+                submission_id="sub_xyz789"
+            )
+
+            submission = result.submission
+            print(f"Submission ID: {submission.id}")
+            print(f"Form ID: {submission.form_id}")
+            print(f"Completed: {submission.is_completed}")
+            print(f"Submitted at: {submission.submitted_at}")
+
+            # Access questions
+            print(f"\nQuestions ({len(result.questions)}):")
+            for question in result.questions:
+                print(f"  - {question.title} ({question.type})")
+
+            # Access responses
+            print(f"\nResponses ({len(submission.responses)}):")
+            for response in submission.responses:
+                # Find the corresponding question
+                question = next(
+                    (q for q in result.questions if q.id == response.question_id),
+                    None
+                )
+                if question:
+                    print(f"  {question.title}: {response.value}")
+                else:
+                    print(f"  Question {response.question_id}: {response.value}")
+            ```
+        """
+        data = self._client.request(
+            "GET", f"/forms/{form_id}/submissions/{submission_id}"
+        )
+        return SubmissionWithQuestions.from_dict(data)
+
+    def delete_submission(self, form_id: str, submission_id: str) -> None:
+        """Delete a specific submission by ID.
+
+        Permanently removes a submission from a form. This operation cannot be undone.
+
+        Args:
+            form_id: The ID of the form
+            submission_id: The ID of the submission to delete
+
+        Example:
+            ```python
+            from tally import Tally
+
+            client = Tally(api_key="tly-xxxx")
+
+            client.forms.delete_submission(
+                form_id="form_abc123",
+                submission_id="sub_xyz789"
+            )
+            ```
+        """
+        self._client.request("DELETE", f"/forms/{form_id}/submissions/{submission_id}")
 
     def __iter__(self) -> Iterator[Form]:
         """Iterate through all forms across all pages.
