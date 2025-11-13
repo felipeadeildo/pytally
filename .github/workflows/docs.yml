@@ -6,7 +6,6 @@ on:
 permissions:
   contents: read
   pages: write
-  id-token: write
 
 jobs:
   build:
@@ -23,10 +22,10 @@ jobs:
         with:
           version: "latest"
 
-      - name: Sync dependencies (uv)
+      - name: Sync deps
         run: uv sync
 
-      - name: Build Site
+      - name: Build site
         run: uv run mkdocs build --clean
 
       - name: Deploy to gh-pages
