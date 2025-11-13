@@ -1,6 +1,7 @@
 """Workspaces resource for the Tally API."""
 
-from typing import TYPE_CHECKING, Iterator
+from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
 from tally.models.workspace import PaginatedWorkspaces, Workspace
 
@@ -79,8 +80,7 @@ class WorkspacesResource:
         while True:
             result = self.all(page=page)
 
-            for workspace in result.items:
-                yield workspace
+            yield from result.items
 
             if not result.has_more:
                 break
@@ -162,10 +162,9 @@ class WorkspacesResource:
             print("Workspace updated successfully")
             ```
         """
-        # ? actually i dont know if the API returns the updated workspace (the API docs dont say anything about it)
-        self._client.request(
-            "PATCH", f"/workspaces/{workspace_id}", json={"name": name}
-        )
+        # ? actually i dont know if the API returns the updated workspace
+        # ? (the API docs dont say anything about it)
+        self._client.request("PATCH", f"/workspaces/{workspace_id}", json={"name": name})
 
     def delete(self, workspace_id: str) -> None:
         """Delete a workspace.

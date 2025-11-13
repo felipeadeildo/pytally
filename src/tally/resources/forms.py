@@ -1,6 +1,7 @@
 """Forms resource for the Tally API."""
 
-from typing import TYPE_CHECKING, Any, Iterator
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any
 
 from tally.models.form import (
     Form,
@@ -173,21 +174,14 @@ class FormsResource:
                     type=BlockType.FORM_TITLE,
                     group_uuid="3c90c3cc-0d44-4b50-8888-8dd25736052a",
                     group_type=BlockType.FORM_TITLE,
-                    payload={"html": "<h1>My Form</h1>"}
+                    payload={"html": "<h1>My Form</h1>"},
                 )
             ]
 
-            settings = FormSettings(
-                is_closed=False,
-                save_for_later=True,
-                has_progress_bar=True
-            )
+            settings = FormSettings(is_closed=False, save_for_later=True, has_progress_bar=True)
 
             form = client.forms.create(
-                status=FormStatus.DRAFT,
-                blocks=blocks,
-                workspace_id="ws_123",
-                settings=settings
+                status=FormStatus.DRAFT, blocks=blocks, workspace_id="ws_123", settings=settings
             )
 
             print(f"Created form: {form.id}")
@@ -196,25 +190,23 @@ class FormsResource:
             # Or use simple dicts for flexibility
             form = client.forms.create(
                 status="DRAFT",
-                blocks=[{
-                    "uuid": "3c90c3cc-0d44-4b50-8888-8dd25736052a",
-                    "type": "FORM_TITLE",
-                    "groupUuid": "3c90c3cc-0d44-4b50-8888-8dd25736052a",
-                    "groupType": "FORM_TITLE",
-                    "payload": {"html": "<h1>My Form</h1>"}
-                }],
-                settings={
-                    "isClosed": False,
-                    "saveForLater": True
-                }
+                blocks=[
+                    {
+                        "uuid": "3c90c3cc-0d44-4b50-8888-8dd25736052a",
+                        "type": "FORM_TITLE",
+                        "groupUuid": "3c90c3cc-0d44-4b50-8888-8dd25736052a",
+                        "groupType": "FORM_TITLE",
+                        "payload": {"html": "<h1>My Form</h1>"},
+                    }
+                ],
+                settings={"isClosed": False, "saveForLater": True},
             )
             ```
         """
         body: dict[str, Any] = {
             "status": status.value if isinstance(status, FormStatus) else status,
             "blocks": [
-                block.to_dict() if isinstance(block, FormBlock) else block
-                for block in blocks
+                block.to_dict() if isinstance(block, FormBlock) else block for block in blocks
             ],
         }
 
@@ -263,16 +255,10 @@ class FormsResource:
             client = Tally(api_key="tly-xxxx")
 
             # Update form name only
-            form = client.forms.update(
-                form_id="form_abc123",
-                name="Updated Form Name"
-            )
+            form = client.forms.update(form_id="form_abc123", name="Updated Form Name")
 
             # Update status to published
-            form = client.forms.update(
-                form_id="form_abc123",
-                status=FormStatus.PUBLISHED
-            )
+            form = client.forms.update(form_id="form_abc123", status=FormStatus.PUBLISHED)
 
             # Update multiple fields at once
             form = client.forms.update(
@@ -282,18 +268,14 @@ class FormsResource:
                 settings=FormSettings(
                     is_closed=True,
                     close_message_title="Form Closed",
-                    close_message_description="Thank you for your interest"
-                )
+                    close_message_description="Thank you for your interest",
+                ),
             )
 
             # Update with dict for flexibility
             form = client.forms.update(
                 form_id="form_abc123",
-                settings={
-                    "isClosed": False,
-                    "hasProgressBar": True,
-                    "saveForLater": True
-                }
+                settings={"isClosed": False, "hasProgressBar": True, "saveForLater": True},
             )
             ```
         """
@@ -307,8 +289,7 @@ class FormsResource:
 
         if blocks is not None:
             body["blocks"] = [
-                block.to_dict() if isinstance(block, FormBlock) else block
-                for block in blocks
+                block.to_dict() if isinstance(block, FormBlock) else block for block in blocks
             ]
 
         if settings is not None:
@@ -434,30 +415,24 @@ class FormsResource:
 
             # Filter by completion status
             completed = client.forms.list_submissions(
-                "form_abc123",
-                filter=SubmissionFilter.COMPLETED
+                "form_abc123", filter=SubmissionFilter.COMPLETED
             )
 
             # Filter by date range
             recent = client.forms.list_submissions(
-                "form_abc123",
-                start_date="2024-01-01T00:00:00Z",
-                end_date="2024-12-31T23:59:59Z"
+                "form_abc123", start_date="2024-01-01T00:00:00Z", end_date="2024-12-31T23:59:59Z"
             )
 
             # Cursor-based pagination
             next_batch = client.forms.list_submissions(
-                "form_abc123",
-                after_id=result.submissions[-1].id
+                "form_abc123", after_id=result.submissions[-1].id
             )
             ```
         """
         params: dict[str, str | int] = {"page": page}
 
         if filter is not None:
-            params["filter"] = (
-                filter.value if isinstance(filter, SubmissionFilter) else filter
-            )
+            params["filter"] = filter.value if isinstance(filter, SubmissionFilter) else filter
 
         if start_date is not None:
             params["startDate"] = start_date
@@ -468,14 +443,10 @@ class FormsResource:
         if after_id is not None:
             params["afterId"] = after_id
 
-        data = self._client.request(
-            "GET", f"/forms/{form_id}/submissions", params=params
-        )
+        data = self._client.request("GET", f"/forms/{form_id}/submissions", params=params)
         return PaginatedSubmissions.from_dict(data)
 
-    def get_submission(
-        self, form_id: str, submission_id: str
-    ) -> SubmissionWithQuestions:
+    def get_submission(self, form_id: str, submission_id: str) -> SubmissionWithQuestions:
         """Get a specific submission by ID with all its responses and questions.
 
         Returns the complete submission details including all responses and
@@ -498,10 +469,7 @@ class FormsResource:
 
             client = Tally(api_key="tly-xxxx")
 
-            result = client.forms.get_submission(
-                form_id="form_abc123",
-                submission_id="sub_xyz789"
-            )
+            result = client.forms.get_submission(form_id="form_abc123", submission_id="sub_xyz789")
 
             submission = result.submission
             print(f"Submission ID: {submission.id}")
@@ -518,19 +486,14 @@ class FormsResource:
             print(f"\nResponses ({len(submission.responses)}):")
             for response in submission.responses:
                 # Find the corresponding question
-                question = next(
-                    (q for q in result.questions if q.id == response.question_id),
-                    None
-                )
+                question = next((q for q in result.questions if q.id == response.question_id), None)
                 if question:
                     print(f"  {question.title}: {response.value}")
                 else:
                     print(f"  Question {response.question_id}: {response.value}")
             ```
         """
-        data = self._client.request(
-            "GET", f"/forms/{form_id}/submissions/{submission_id}"
-        )
+        data = self._client.request("GET", f"/forms/{form_id}/submissions/{submission_id}")
         return SubmissionWithQuestions.from_dict(data)
 
     def delete_submission(self, form_id: str, submission_id: str) -> None:
@@ -548,10 +511,7 @@ class FormsResource:
 
             client = Tally(api_key="tly-xxxx")
 
-            client.forms.delete_submission(
-                form_id="form_abc123",
-                submission_id="sub_xyz789"
-            )
+            client.forms.delete_submission(form_id="form_abc123", submission_id="sub_xyz789")
             ```
         """
         self._client.request("DELETE", f"/forms/{form_id}/submissions/{submission_id}")
@@ -581,8 +541,7 @@ class FormsResource:
         while True:
             result = self.all(page=page)
 
-            for form in result.items:
-                yield form
+            yield from result.items
 
             if not result.has_more:
                 break

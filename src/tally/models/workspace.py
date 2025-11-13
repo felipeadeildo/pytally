@@ -53,9 +53,7 @@ class Workspace:
             id=data["id"],
             name=data["name"],
             members=[User.from_dict(member) for member in data.get("members", [])],
-            invites=[
-                WorkspaceInvite.from_dict(invite) for invite in data.get("invites", [])
-            ],
+            invites=[WorkspaceInvite.from_dict(invite) for invite in data.get("invites", [])],
             created_by_user_id=data["createdByUserId"],
             created_at=datetime.fromisoformat(data["createdAt"].replace("Z", "+00:00")),
             updated_at=datetime.fromisoformat(data["updatedAt"].replace("Z", "+00:00")),

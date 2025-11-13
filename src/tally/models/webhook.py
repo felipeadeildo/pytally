@@ -61,17 +61,14 @@ class Webhook:
             url=data["url"],
             signing_secret=data.get("signingSecret"),
             http_headers=[
-                WebhookHeader.from_dict(header)
-                for header in data.get("httpHeaders") or []
+                WebhookHeader.from_dict(header) for header in data.get("httpHeaders") or []
             ]
             if data.get("httpHeaders")
             else None,
             event_types=[WebhookEventType(event) for event in data["eventTypes"]],
             external_subscriber=data.get("externalSubscriber"),
             is_enabled=data["isEnabled"],
-            last_synced_at=datetime.fromisoformat(
-                data["lastSyncedAt"].replace("Z", "+00:00")
-            )
+            last_synced_at=datetime.fromisoformat(data["lastSyncedAt"].replace("Z", "+00:00"))
             if data.get("lastSyncedAt")
             else None,
             created_at=datetime.fromisoformat(data["createdAt"].replace("Z", "+00:00")),

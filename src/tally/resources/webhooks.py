@@ -1,6 +1,7 @@
 """Webhooks resource for the Tally API."""
 
-from typing import TYPE_CHECKING, Iterator
+from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
 from tally.models.webhook import (
     PaginatedWebhookEvents,
@@ -63,38 +64,6 @@ class WebhooksResource:
         data = self._client.request("GET", "/webhooks", params=params)
         return PaginatedWebhooks.from_dict(data)
 
-    def __iter__(self) -> Iterator[Webhook]:
-        """Iterate through all webhooks across all pages.
-
-        Automatically fetches all pages and yields each webhook.
-
-        Yields:
-            Webhook objects one at a time
-
-        Example:
-            ```python
-            from tally import Tally
-
-            client = Tally(api_key="tly-xxxx")
-
-            # Iterate through all webhooks automatically
-            for webhook in client.webhooks:
-                print(f"Webhook: {webhook.url}")
-                print(f"  Enabled: {webhook.is_enabled}")
-            ```
-        """
-        page = 1
-        while True:
-            result = self.all(page=page)
-
-            for webhook in result.webhooks:
-                yield webhook
-
-            if not result.has_more:
-                break
-
-            page += 1
-
     def create(
         self,
         form_id: str,
@@ -132,16 +101,14 @@ class WebhooksResource:
 
             # Simple webhook with string event types
             webhook = client.webhooks.create(
-                form_id="form_123",
-                url="https://example.com/webhook",
-                event_types=["FORM_RESPONSE"]
+                form_id="form_123", url="https://example.com/webhook", event_types=["FORM_RESPONSE"]
             )
 
             # Using enum types
             webhook = client.webhooks.create(
                 form_id="form_123",
                 url="https://example.com/webhook",
-                event_types=[WebhookEventType.FORM_RESPONSE]
+                event_types=[WebhookEventType.FORM_RESPONSE],
             )
 
             # With custom headers and signing secret
@@ -149,10 +116,8 @@ class WebhooksResource:
                 form_id="form_123",
                 url="https://example.com/webhook",
                 signing_secret="my-secret",
-                http_headers=[
-                    {"name": "X-Custom-Header", "value": "custom-value"}
-                ],
-                external_subscriber="my-app"
+                http_headers=[{"name": "X-Custom-Header", "value": "custom-value"}],
+                external_subscriber="my-app",
             )
             ```
         """
@@ -161,8 +126,7 @@ class WebhooksResource:
             event_types_list = ["FORM_RESPONSE"]
         else:
             event_types_list = [
-                et.value if isinstance(et, WebhookEventType) else et
-                for et in event_types
+                et.value if isinstance(et, WebhookEventType) else et for et in event_types
             ]
 
         # Build payload
@@ -231,7 +195,7 @@ class WebhooksResource:
                 url="https://example.com/new-webhook",
                 event_types=["FORM_RESPONSE"],
                 is_enabled=True,
-                signing_secret="new-secret"
+                signing_secret="new-secret",
             )
             print("Webhook updated successfully")
             ```
@@ -325,9 +289,7 @@ class WebhooksResource:
             ```
         """
         params = {"page": page}
-        data = self._client.request(
-            "GET", f"/webhooks/{webhook_id}/events", params=params
-        )
+        data = self._client.request("GET", f"/webhooks/{webhook_id}/events", params=params)
         return PaginatedWebhookEvents.from_dict(data)
 
     def retry_event(self, webhook_id: str, event_id: str) -> None:
@@ -359,3 +321,34 @@ class WebhooksResource:
             ```
         """
         self._client.request("POST", f"/webhooks/{webhook_id}/events/{event_id}")
+
+    def __iter__(self) -> Iterator[Webhook]:
+        """Iterate through all webhooks across all pages.
+
+        Automatically fetches all pages and yields each webhook.
+
+        Yields:
+            Webhook objects one at a time
+
+        Example:
+            ```python
+            from tally import Tally
+
+            client = Tally(api_key="tly-xxxx")
+
+            # Iterate through all webhooks automatically
+            for webhook in client.webhooks:
+                print(f"Webhook: {webhook.url}")
+                print(f"  Enabled: {webhook.is_enabled}")
+            ```
+        """
+        page = 1
+        while True:
+            result = self.all(page=page)
+
+            yield from result.webhooks
+
+            if not result.has_more:
+                break
+
+            page += 1

@@ -70,9 +70,7 @@ class OrganizationsResource:
             print("User removed successfully")
             ```
         """
-        self._client.request(
-            "DELETE", f"/organizations/{organization_id}/users/{user_id}"
-        )
+        self._client.request("DELETE", f"/organizations/{organization_id}/users/{user_id}")
 
     def list_invites(self, organization_id: str) -> list[Invite]:
         """List all invites in an organization.
@@ -133,7 +131,7 @@ class OrganizationsResource:
             client.organizations.create_invites(
                 organization_id="org_123",
                 workspace_ids=["ws_456", "ws_789"],
-                emails="user1@example.com, user2@example.com"
+                emails="user1@example.com, user2@example.com",
             )
             print("Invites created successfully")
             ```
@@ -176,6 +174,4 @@ class OrganizationsResource:
             print("Invite cancelled successfully")
             ```
         """
-        self._client.request(
-            "DELETE", f"/organizations/{organization_id}/invites/{invite_id}"
-        )
+        self._client.request("DELETE", f"/organizations/{organization_id}/invites/{invite_id}")

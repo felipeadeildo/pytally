@@ -117,7 +117,7 @@ class TallyClient:
         *,
         params: dict[str, Any] | None = None,
         json: dict[str, Any] | None = None,
-    ) -> Any:
+    ) -> Any:  # noqa: ANN401
         """Make a request to the Tally API.
 
         Args:
@@ -175,6 +175,6 @@ class TallyClient:
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:  # noqa: ANN401
         """Context manager exit."""
         self.close()

@@ -199,9 +199,7 @@ class FormSettings:
             self_email_subject=data.get("selfEmailSubject"),
             self_email_from_name=data.get("selfEmailFromName"),
             self_email_body=data.get("selfEmailBody"),
-            has_respondent_email_notifications=data.get(
-                "hasRespondentEmailNotifications", False
-            ),
+            has_respondent_email_notifications=data.get("hasRespondentEmailNotifications", False),
             respondent_email_to=data.get("respondentEmailTo"),
             respondent_email_reply_to=data.get("respondentEmailReplyTo"),
             respondent_email_subject=data.get("respondentEmailSubject"),
@@ -213,9 +211,7 @@ class FormSettings:
             save_for_later=data.get("saveForLater", True),
             styles=data.get("styles"),
             password=data.get("password"),
-            submissions_data_retention_duration=data.get(
-                "submissionsDataRetentionDuration"
-            ),
+            submissions_data_retention_duration=data.get("submissionsDataRetentionDuration"),
             submissions_data_retention_unit=data.get("submissionsDataRetentionUnit"),
         )
 
@@ -253,9 +249,7 @@ class FormSettings:
             settings_dict["selfEmailFromName"] = self.self_email_from_name
         if self.self_email_body is not None:
             settings_dict["selfEmailBody"] = self.self_email_body
-        settings_dict["hasRespondentEmailNotifications"] = (
-            self.has_respondent_email_notifications
-        )
+        settings_dict["hasRespondentEmailNotifications"] = self.has_respondent_email_notifications
         if self.respondent_email_to is not None:
             settings_dict["respondentEmailTo"] = self.respondent_email_to
         if self.respondent_email_reply_to is not None:
@@ -279,9 +273,7 @@ class FormSettings:
                 self.submissions_data_retention_duration
             )
         if self.submissions_data_retention_unit is not None:
-            settings_dict["submissionsDataRetentionUnit"] = (
-                self.submissions_data_retention_unit
-            )
+            settings_dict["submissionsDataRetentionUnit"] = self.submissions_data_retention_unit
 
         return settings_dict
 
@@ -312,9 +304,7 @@ class FormCreated:
             is_closed=data["isClosed"],
             created_at=datetime.fromisoformat(data["createdAt"].replace("Z", "+00:00")),
             updated_at=datetime.fromisoformat(data["updatedAt"].replace("Z", "+00:00")),
-            payments=[
-                FormPayment.from_dict(payment) for payment in data.get("payments", [])
-            ]
+            payments=[FormPayment.from_dict(payment) for payment in data.get("payments", [])]
             if data.get("payments")
             else None,
         )
@@ -346,9 +336,7 @@ class Form:
             is_closed=data["isClosed"],
             created_at=datetime.fromisoformat(data["createdAt"].replace("Z", "+00:00")),
             updated_at=datetime.fromisoformat(data["updatedAt"].replace("Z", "+00:00")),
-            payments=[
-                FormPayment.from_dict(payment) for payment in data.get("payments", [])
-            ]
+            payments=[FormPayment.from_dict(payment) for payment in data.get("payments", [])]
             if data.get("payments")
             else None,
         )
@@ -388,9 +376,7 @@ class FormDetails:
             updated_at=datetime.fromisoformat(data["updatedAt"].replace("Z", "+00:00")),
             settings=FormSettings.from_dict(data["settings"]),
             blocks=[FormBlock.from_dict(block) for block in data.get("blocks", [])],
-            payments=[
-                FormPayment.from_dict(payment) for payment in data.get("payments", [])
-            ]
+            payments=[FormPayment.from_dict(payment) for payment in data.get("payments", [])]
             if data.get("payments")
             else None,
         )
@@ -520,12 +506,9 @@ class Submission:
             id=data["id"],
             form_id=data["formId"],
             is_completed=data["isCompleted"],
-            submitted_at=datetime.fromisoformat(
-                data["submittedAt"].replace("Z", "+00:00")
-            ),
+            submitted_at=datetime.fromisoformat(data["submittedAt"].replace("Z", "+00:00")),
             responses=[
-                SubmissionResponse.from_dict(response)
-                for response in data.get("responses", [])
+                SubmissionResponse.from_dict(response) for response in data.get("responses", [])
             ],
         )
 
@@ -541,9 +524,7 @@ class SubmissionsFilterCount:
     @classmethod
     def from_dict(cls, data: dict) -> "SubmissionsFilterCount":
         """Create a SubmissionsFilterCount instance from API response data."""
-        return cls(
-            all=data["all"], completed=data["completed"], partial=data["partial"]
-        )
+        return cls(all=data["all"], completed=data["completed"], partial=data["partial"])
 
 
 @dataclass
@@ -596,14 +577,11 @@ class SubmissionDetails:
             id=data["id"],
             form_id=data["formId"],
             is_completed=data["isCompleted"],
-            submitted_at=datetime.fromisoformat(
-                data["submittedAt"].replace("Z", "+00:00")
-            ),
+            submitted_at=datetime.fromisoformat(data["submittedAt"].replace("Z", "+00:00")),
             created_at=datetime.fromisoformat(data["createdAt"].replace("Z", "+00:00")),
             updated_at=datetime.fromisoformat(data["updatedAt"].replace("Z", "+00:00")),
             responses=[
-                SubmissionResponse.from_dict(response)
-                for response in data.get("responses", [])
+                SubmissionResponse.from_dict(response) for response in data.get("responses", [])
             ],
         )
 
