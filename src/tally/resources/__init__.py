@@ -2,10 +2,12 @@
 
 from tally.resources.organizations import OrganizationsResource
 from tally.resources.users import UsersResource
+from tally.resources.webhooks import WebhooksResource
 from tally.resources.workspaces import WorkspacesResource
 
 __all__ = [
     "OrganizationsResource",
     "UsersResource",
+    "WebhooksResource",
     "WorkspacesResource",
 ]

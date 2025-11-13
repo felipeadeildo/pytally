@@ -20,8 +20,8 @@ class WorkspacesResource:
         self._client = client
 
     # ? possibly there's limit query string param
-    def list(self, page: int = 1) -> PaginatedWorkspaces:
-        """List workspaces with pagination.
+    def all(self, page: int = 1) -> PaginatedWorkspaces:
+        """Get all workspaces with pagination.
 
         Returns a paginated array of workspace objects with associated users
         and pending invites.
@@ -39,7 +39,7 @@ class WorkspacesResource:
             client = Tally(api_key="tly-xxxx")
 
             # Get first page
-            result = client.workspaces.list()
+            result = client.workspaces.all()
             print(f"Page {result.page} of {result.total} workspaces")
 
             for workspace in result.items:
@@ -49,7 +49,7 @@ class WorkspacesResource:
 
             # Get next page if available
             if result.has_more:
-                next_page = client.workspaces.list(page=result.page + 1)
+                next_page = client.workspaces.all(page=result.page + 1)
             ```
         """
         data = self._client.request("GET", "/workspaces", params={"page": page})
@@ -77,7 +77,7 @@ class WorkspacesResource:
         """
         page = 1
         while True:
-            result = self.list(page=page)
+            result = self.all(page=page)
 
             for workspace in result.items:
                 yield workspace

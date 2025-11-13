@@ -15,15 +15,24 @@ from tally.exceptions import (
 )
 from tally.models import (
     Invite,
+    PaginatedWebhookEvents,
+    PaginatedWebhooks,
     PaginatedWorkspaces,
     SubscriptionPlan,
     User,
+    Webhook,
+    WebhookCreated,
+    WebhookDeliveryStatus,
+    WebhookEvent,
+    WebhookEventType,
+    WebhookHeader,
     Workspace,
     WorkspaceInvite,
 )
 from tally.resources import (
     OrganizationsResource,
     UsersResource,
+    WebhooksResource,
     WorkspacesResource,
 )
 
@@ -39,11 +48,20 @@ __all__ = [
     # Resources
     "OrganizationsResource",
     "UsersResource",
+    "WebhooksResource",
     "WorkspacesResource",
     # Models
     "Invite",
+    "PaginatedWebhookEvents",
+    "PaginatedWebhooks",
     "PaginatedWorkspaces",
     "User",
+    "Webhook",
+    "WebhookCreated",
+    "WebhookDeliveryStatus",
+    "WebhookEvent",
+    "WebhookEventType",
+    "WebhookHeader",
     "Workspace",
     "WorkspaceInvite",
     "SubscriptionPlan",
