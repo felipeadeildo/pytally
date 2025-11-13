@@ -1,8 +1,15 @@
 """Forms resource for the Tally API."""
 
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Any, Iterator
 
-from tally.models.form import Form, PaginatedForms
+from tally.models.form import (
+    Form,
+    FormBlock,
+    FormCreated,
+    FormSettings,
+    FormStatus,
+    PaginatedForms,
+)
 
 if TYPE_CHECKING:
     from tally.client import TallyClient
@@ -68,6 +75,104 @@ class FormsResource:
 
         data = self._client.request("GET", "/forms", params=params)
         return PaginatedForms.from_dict(data)
+
+    def create(
+        self,
+        status: FormStatus | str,
+        blocks: list[FormBlock] | list[dict[str, Any]],
+        workspace_id: str | None = None,
+        template_id: str | None = None,
+        settings: FormSettings | dict[str, Any] | None = None,
+    ) -> FormCreated:
+        """Create a new form.
+
+        Creates a new form, optionally based on a template or within a specific workspace.
+
+        Args:
+            status: Initial status of the form (BLANK, DRAFT, PUBLISHED, DELETED)
+            blocks: Array of form block objects defining the form structure
+            workspace_id: ID of the workspace to create the form in (optional)
+            template_id: ID of the template to base the form on (optional)
+            settings: Form settings configuration (optional)
+
+        Returns:
+            FormCreated object with the created form details
+
+        Raises:
+            BadRequestError: If the request parameters are invalid
+
+        Example:
+            ```python
+            from tally import Tally
+            from tally.models import FormStatus, FormBlock, BlockType, FormSettings
+
+            client = Tally(api_key="tly-xxxx")
+
+            # Create a simple form with type-safe objects
+            blocks = [
+                FormBlock(
+                    uuid="3c90c3cc-0d44-4b50-8888-8dd25736052a",
+                    type=BlockType.FORM_TITLE,
+                    group_uuid="3c90c3cc-0d44-4b50-8888-8dd25736052a",
+                    group_type=BlockType.FORM_TITLE,
+                    payload={"html": "<h1>My Form</h1>"}
+                )
+            ]
+
+            settings = FormSettings(
+                is_closed=False,
+                save_for_later=True,
+                has_progress_bar=True
+            )
+
+            form = client.forms.create(
+                status=FormStatus.DRAFT,
+                blocks=blocks,
+                workspace_id="ws_123",
+                settings=settings
+            )
+
+            print(f"Created form: {form.id}")
+            print(f"Status: {form.status.value}")
+
+            # Or use simple dicts for flexibility
+            form = client.forms.create(
+                status="DRAFT",
+                blocks=[{
+                    "uuid": "3c90c3cc-0d44-4b50-8888-8dd25736052a",
+                    "type": "FORM_TITLE",
+                    "groupUuid": "3c90c3cc-0d44-4b50-8888-8dd25736052a",
+                    "groupType": "FORM_TITLE",
+                    "payload": {"html": "<h1>My Form</h1>"}
+                }],
+                settings={
+                    "isClosed": False,
+                    "saveForLater": True
+                }
+            )
+            ```
+        """
+        body: dict[str, Any] = {
+            "status": status.value if isinstance(status, FormStatus) else status,
+            "blocks": [
+                block.to_dict() if isinstance(block, FormBlock) else block
+                for block in blocks
+            ],
+        }
+
+        if workspace_id is not None:
+            body["workspaceId"] = workspace_id
+
+        if template_id is not None:
+            body["templateId"] = template_id
+
+        if settings is not None:
+            body["settings"] = (
+                settings.to_dict() if isinstance(settings, FormSettings) else settings
+            )
+
+        data = self._client.request("POST", "/forms", json=body)
+        return FormCreated.from_dict(data)
 
     def __iter__(self) -> Iterator[Form]:
         """Iterate through all forms across all pages.
