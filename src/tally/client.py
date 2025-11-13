@@ -15,6 +15,7 @@ from tally.exceptions import (
     UnauthorizedError,
 )
 from tally.resources import (
+    FormsResource,
     OrganizationsResource,
     UsersResource,
     WebhooksResource,
@@ -60,6 +61,7 @@ class TallyClient:
         self.organizations = OrganizationsResource(self)
         self.workspaces = WorkspacesResource(self)
         self.webhooks = WebhooksResource(self)
+        self.forms = FormsResource(self)
 
     def _get_headers(self) -> dict[str, str]:
         """Get default headers for API requests."""

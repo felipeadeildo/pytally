@@ -14,7 +14,11 @@ from tally.exceptions import (
     UnauthorizedError,
 )
 from tally.models import (
+    Form,
+    FormPayment,
+    FormStatus,
     Invite,
+    PaginatedForms,
     PaginatedWebhookEvents,
     PaginatedWebhooks,
     PaginatedWorkspaces,
@@ -30,6 +34,7 @@ from tally.models import (
     WorkspaceInvite,
 )
 from tally.resources import (
+    FormsResource,
     OrganizationsResource,
     UsersResource,
     WebhooksResource,
@@ -46,12 +51,17 @@ __all__ = [
     "Tally",
     "TallyClient",
     # Resources
+    "FormsResource",
     "OrganizationsResource",
     "UsersResource",
     "WebhooksResource",
     "WorkspacesResource",
     # Models
+    "Form",
+    "FormPayment",
+    "FormStatus",
     "Invite",
+    "PaginatedForms",
     "PaginatedWebhookEvents",
     "PaginatedWebhooks",
     "PaginatedWorkspaces",
