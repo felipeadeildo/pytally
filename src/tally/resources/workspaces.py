@@ -86,3 +86,30 @@ class WorkspacesResource:
                 break
 
             page += 1
+
+    def create(self, name: str) -> Workspace:
+        """Create a new workspace.
+
+        Creates a new workspace and assigns the authenticated user as a member.
+        Requires a Pro subscription.
+
+        Args:
+            name: The name of the workspace
+
+        Returns:
+            Workspace object with the created workspace
+
+        Raises:
+            ForbiddenError: If user doesn't have a Pro subscription
+
+        Example:
+            ```python
+            from tally import Tally
+
+            client = Tally(api_key="tly-xxxx")
+            workspace = client.workspaces.create(name="My New Workspace")
+            print(f"Created workspace: {workspace.name} (ID: {workspace.id})")
+            ```
+        """
+        data = self._client.request("POST", "/workspaces", json={"name": name})
+        return Workspace.from_dict(data)
