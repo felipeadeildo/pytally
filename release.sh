@@ -31,4 +31,4 @@ git push origin main --tags
 
 echo ""
 echo "✨ Release v$VERSION criada com sucesso!"
-echo "🔗 Acompanhe o build em: https://github.com/felipeadeildo/pytally/actions"
+echo "🔗 Acompanhe o build em: https://github.com/felipeadeildo/pytally-sdk/actions"

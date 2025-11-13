@@ -4,8 +4,8 @@ site_description: Unofficial Python SDK for the Tally.so API
 site_author: Felipe Adeildo
 copyright: Copyright &copy; 2025 Felipe Adeildo
 
-repo_url: https://github.com/felipeadeildo/pytally
-repo_name: felipeadeildo/pytally
+repo_url: https://github.com/felipeadeildo/pytally-sdk
+repo_name: felipeadeildo/pytally-sdk
 edit_uri: blob/main/docs/
 
 theme:
@@ -92,6 +92,6 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/felipeadeildo/pytally
+      link: https://github.com/felipeadeildo/pytally-sdk
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/pytally-sdk/

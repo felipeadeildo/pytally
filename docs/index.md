@@ -205,13 +205,13 @@ client = Tally(
 ## Links
 
 - [PyPI Package](https://pypi.org/project/pytally-sdk/)
-- [GitHub Repository](https://github.com/felipeadeildo/pytally)
+- [GitHub Repository](https://github.com/felipeadeildo/pytally-sdk)
 - [Official Tally API Documentation](https://developers.tally.so/api-reference/introduction)
-- [Issue Tracker](https://github.com/felipeadeildo/pytally/issues)
+- [Issue Tracker](https://github.com/felipeadeildo/pytally-sdk/issues)
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](https://github.com/felipeadeildo/pytally/blob/main/LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](https://github.com/felipeadeildo/pytally-sdk/blob/main/LICENSE) file for details.
 
 !!! warning "Disclaimer"
     This is an unofficial SDK and is not affiliated with or endorsed by Tally. Tally and the Tally logo are trademarks of Tally B.V.
