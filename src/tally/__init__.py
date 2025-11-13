@@ -14,7 +14,7 @@ from tally.exceptions import (
     UnauthorizedError,
 )
 
-__version__ = "0.1.7"
+__version__ = "0.1.9"
 
 # Alias for convenience
 Tally = TallyClient
